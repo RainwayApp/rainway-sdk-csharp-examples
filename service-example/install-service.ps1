@@ -22,7 +22,7 @@ $serviceName = "BasicService"
 
 if ((Get-Service $serviceName -ErrorAction SilentlyContinue)) {
     Write-Host "Removing service: ${serviceName} (${executable})"
-    Remove-Service -Name $serviceName -ErrorAction Stop
+    sc.exe delete $serviceName
 }
 
 $params = @{
@@ -54,7 +54,9 @@ if ([string]::IsNullOrEmpty($currentSID)) {
     Write-Error "'whoami' failed to return a SID" -ErrorAction Stop
 }
 
-$securityDescriptor = ([String] (sc sdshow "${serviceName}")).Trim()
+Write-Output "Determined current user to be SID: $currentSID"
+
+$securityDescriptor = ([String] (sc.exe sdshow "${serviceName}")).Trim()
 
 if ([string]::IsNullOrEmpty($currentSID)) {
     Write-Error "'sc' failed to return the SDDL for service '${serviceName}'" -ErrorAction Stop
@@ -66,7 +68,8 @@ if ([int]$sIndex -le 0) {
     Write-Error "Unable to locate descriptor index" -ErrorAction Stop
 }
 
+# see https://docs.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format for more info
 $sddlMod = "$($securityDescriptor.Substring(0,$sIndex))(A;;LCRPWP;;;${currentSID})$($securityDescriptor.Substring($sIndex))"
 
-Set-Service -Name $serviceName -SecurityDescriptorSddl "$sddlMod" -ErrorAction Stop
+sc.exe sdset "$serviceName" "$sddlMod"
 Write-Host "User '${currentUser}' can now start service '${serviceName}' without elevation"

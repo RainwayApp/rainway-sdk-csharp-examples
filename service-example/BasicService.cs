@@ -98,7 +98,7 @@ namespace ServiceExample
                     }
                     // If everything is good, the current executing service / process exits, and the child is the new primary process.
                     EventLog.WriteEntry(EventSource, "Interactive service successfully created.", EventLogEntryType.Information);
-                    // We should never end up here, but just in case we stop the service.
+                    // stop the service so the current process exits
                     Stop();
                 }
                 catch (Exception ex)

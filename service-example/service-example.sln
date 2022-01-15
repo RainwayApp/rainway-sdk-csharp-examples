@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "service-example", "service-example.csproj", "{B42FC3F9-976A-4686-9756-C6E11E2ED657}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B42FC3F9-976A-4686-9756-C6E11E2ED657}.Debug|x64.ActiveCfg = Debug|x64
+		{B42FC3F9-976A-4686-9756-C6E11E2ED657}.Debug|x64.Build.0 = Debug|x64
+		{B42FC3F9-976A-4686-9756-C6E11E2ED657}.Release|x64.ActiveCfg = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DB8266E5-1E30-4E71-8C40-A86E96B7FC4F}
+	EndGlobalSection
+EndGlobal

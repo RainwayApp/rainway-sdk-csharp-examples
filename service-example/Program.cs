@@ -84,8 +84,8 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
                 IsolateProcessIds = Array.Empty<uint>()
             }),
-            // reverses the data sent by a peer and echos it back
-            OnPeerMessage = (peer, data) => peer.Send(ReverseString(data))
+            // reverses the data sent by a peer over a channel and echos it back
+            OnPeerMessage = (peer, channel, data) => peer.Send(channel, ReverseString(data))
         };
 
         Console.WriteLine($"whoami: {WardenImpersonator.Username}");

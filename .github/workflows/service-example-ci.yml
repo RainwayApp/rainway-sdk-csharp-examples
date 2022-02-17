@@ -6,7 +6,7 @@ on:
     paths:
       - "service-example/**/*"
 jobs:
-  build:
+  service_build:
 
     runs-on: ubuntu-latest
 

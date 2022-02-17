@@ -1,0 +1,28 @@
+name: Service Example CI
+
+on:  
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "service-example/**/*"
+      - ".github/workflows/service-example.ci.yml"
+jobs:
+  service_build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: service-example
+    - name: Build
+      run: dotnet build --no-restore
+      working-directory: service-example
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      working-directory: service-example

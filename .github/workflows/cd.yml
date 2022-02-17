@@ -1,0 +1,32 @@
+name: CD
+
+on:  
+  push:
+    branches: [ main ]
+
+jobs:
+  build_and_release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Publish echo-example
+      run: dotnet publish -c release -r win-x64 --self-contained true -o ../bin/echo-example echo-example.csproj
+      working-directory: echo-example
+    - name: Publish service-example
+      run: dotnet publish -c release -r win-x64 --self-contained true -o ../bin/service-example service-example.csproj
+      working-directory: service-example
+    - name: List bin (local only)
+      if: ${{ env.ACT }}
+      run: ls -alR bin
+    - name: GH Release
+      if: ${{ !env.ACT }}
+      uses: softprops/action-gh-release@v0.1.14
+      with:
+        generate_release_notes: true
+        files: bin/**/*

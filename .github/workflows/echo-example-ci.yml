@@ -1,0 +1,28 @@
+name: Echo Example CI
+
+on:  
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "echo-example/**/*"
+      - ".github/workflows/echo-example.ci.yml"
+jobs:
+  echo_build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: echo-example
+    - name: Build
+      run: dotnet build --no-restore
+      working-directory: echo-example
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      working-directory: echo-example

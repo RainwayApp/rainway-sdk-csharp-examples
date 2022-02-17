@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "echo-example/**/*"
+      - ".github/workflows/echo-example.ci.yml"
 jobs:
   echo_build:
 

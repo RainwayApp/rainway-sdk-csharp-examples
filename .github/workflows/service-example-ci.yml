@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "service-example/**/*"
+      - ".github/workflows/service-example.ci.yml"
 jobs:
   service_build:
 

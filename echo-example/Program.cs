@@ -3,6 +3,14 @@ using System.Text;
 using System.Threading;
 using Rainway.SDK;
 
+// the first and only command line argument should be your rainway api key
+var apiKey = Environment.GetCommandLineArgs()[1];
+
+// if we don't have a valid apiKey, throw an exception
+if (string.IsNullOrEmpty(apiKey))
+{
+    throw new ArgumentException("Expected <apiKey> as the first (and only) command line argument");
+}
 
 static string ReverseString(byte[] data)
 {
@@ -22,8 +30,8 @@ RainwayRuntime.SetLogSink((level, target, message) =>
 // the runtime configuration
 var config = new RainwayConfig
 {
-    // your publishable API key should go here
-    ApiKey = "YOUR_API_KEY",
+    // your publishable API key read from command line arguments above
+    ApiKey = apiKey,
     // any string identifying a user or entity within your app (optional)
     ExternalId = string.Empty,
     // audo accepts all connection request

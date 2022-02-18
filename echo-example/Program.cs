@@ -3,6 +3,16 @@ using System.Text;
 using System.Threading;
 using Rainway.SDK;
 
+// retrieve the cli arguments
+var cliArgs = Environment.GetCommandLineArgs();
+
+// if we don't have a valid apiKey as the only argument, throw an exception
+if (cliArgs.Length != 2 || string.IsNullOrEmpty(cliArgs[1]))
+{
+    throw new ArgumentException("Expected <apiKey> as the first (and only) command line argument");
+}
+
+var apiKey = cliArgs[1];
 
 static string ReverseString(byte[] data)
 {
@@ -22,14 +32,15 @@ RainwayRuntime.SetLogSink((level, target, message) =>
 // the runtime configuration
 var config = new RainwayConfig
 {
-    // your publishable API key should go here
-    ApiKey = "YOUR_API_KEY",
+    // your publishable API key read from command line arguments above
+    ApiKey = apiKey,
     // any string identifying a user or entity within your app (optional)
     ExternalId = string.Empty,
     // audo accepts all connection request
     OnConnectionRequest = (request) => request.Accept(),
     // auto accepts all stream request and gives full input privileges to the remote peer 
-    OnStreamRequest = (requests) => requests.Accept(new RainwayStreamConfig() {
+    OnStreamRequest = (requests) => requests.Accept(new RainwayStreamConfig()
+    {
         InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
         IsolateProcessIds = Array.Empty<uint>()
     }),

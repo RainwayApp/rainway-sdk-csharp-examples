@@ -43,6 +43,13 @@ jobs:
     - name: Create Release Tag
       run: git tag ${{ env.GH_REL_TAG }} && git push origin ${{ env.GH_REL_TAG }}
       if: ${{ !env.ACT }}
+
+    - name: Package bin
+      run: |
+        mkdir rel
+        zip rel/echo-example-${{ env.GH_REL_TAG }}.zip -r bin/echo-example &&
+        zip rel/service-example-${{ env.GH_REL_TAG }}.zip -r bin/service-example &&
+        echo "Packaged."
     
     # Remotely we create the release from the tag
     - name: GH Release
@@ -51,4 +58,4 @@ jobs:
       with:
         tag_name: ${{ env.GH_REL_TAG }}
         generate_release_notes: true
-        files: bin/**/*
+        files: rel/*.zip

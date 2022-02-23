@@ -8,7 +8,7 @@ This example demonstrates how to use the Rainway SDK in a C# console app that ca
 
 The process will accept any incoming stream requests and yield remote control of the host desktop. You can edit the `RainwayConfig` object in Program.cs to modify this behavior.
 
-You can watch the logs for mention of a PeerID, and use the [Web SDK demo app](https://sdk-builds.rainway.com/demos/web/) to connect to it remotely.
+You can watch the logs for mention of a PeerID, and use the [Web SDK demo app](https://sdk-builds.rainway.com/demos/web/) (which is a hosted build created from [this repository](https://github.com/RainwayApp/rainway-sdk-web-demo)) to connect to it remotely.
 
 ## Running as a service
 See [Program.cs](Program.cs#L11) for a description of how the application creates an interactive process for itself when it detects that it was launched as a service.

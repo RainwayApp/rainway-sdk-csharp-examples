@@ -1,10 +1,10 @@
 name: CD
 
-on:  
+on:
   push:
     branches: [ main ]
   workflow_dispatch:
-    
+
 
 jobs:
   build_and_release:
@@ -18,27 +18,27 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    
-    - name: Publish echo-example
-      run: dotnet publish -c release -r win-x64 --self-contained true -o ../bin/echo-example echo-example.csproj
-      working-directory: echo-example
-    
-    - name: Publish service-example
-      run: dotnet publish -c release -r win-x64 --self-contained true -o ../bin/service-example service-example.csproj
-      working-directory: service-example
-    
+
+    - name: Publish host-example
+      run: dotnet publish -c release -r win-x64 --self-contained true -o ../bin/host-example host-example.csproj
+      working-directory: host-example
+
+    - name: Publish host-service-example
+      run: dotnet publish -c release -r win-x64 --self-contained true -o ../bin/host-service-example service-example.csproj
+      working-directory: host-service-example
+
     # Locally we debug the build output
     - name: List bin (local only)
       if: ${{ env.ACT }}
       run: ls -alR bin
-    
+
     - name: Parse git commit
-      run: echo GH_REL_TAG=$(git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/v0-\1/") >> $GITHUB_ENV
-    
+      run: host GH_REL_TAG=$(git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/v0-\1/") >> $GITHUB_ENV
+
     # Locally we debug the tag parse
-    - run: echo ${{ env.GH_REL_TAG }}
+    - run: host ${{ env.GH_REL_TAG }}
       if: ${{ env.ACT }}
-    
+
     # Remotely we create and push the tag
     - name: Create Release Tag
       run: git tag ${{ env.GH_REL_TAG }} && git push origin ${{ env.GH_REL_TAG }}
@@ -47,10 +47,10 @@ jobs:
     - name: Package bin
       run: |
         mkdir rel
-        zip rel/echo-example-${{ env.GH_REL_TAG }}.zip -r bin/echo-example &&
-        zip rel/service-example-${{ env.GH_REL_TAG }}.zip -r bin/service-example &&
-        echo "Packaged."
-    
+        zip rel/host-example-${{ env.GH_REL_TAG }}.zip -r bin/host-example &&
+        zip rel/host-service-example-${{ env.GH_REL_TAG }}.zip -r bin/host-service-example &&
+        host "Packaged."
+
     # Remotely we create the release from the tag
     - name: GH Release
       if: ${{ !env.ACT }}

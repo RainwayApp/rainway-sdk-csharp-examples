@@ -96,14 +96,14 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             ExternalId = "Rainway SDK C# service-example",
             // audo accepts all connection request
             OnConnectionRequest = (request) => request.Accept(),
-            // auto accepts all stream request and gives full input privileges to the remote peer 
+            // auto accepts all stream request and gives full input privileges to the remote peer
             OnStreamRequest = (requests) => requests.Accept(new RainwayStreamConfig()
             {
                 InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
                 IsolateProcessIds = Array.Empty<uint>()
             }),
             // Example handler for messages from a remote peer: reverse UTF-8 data and echo it back.
-            OnPeerMessage = (peer, channel, data) => peer.Send(ReverseString(data))
+            OnPeerMessage = (peer, channel, data) => peer.Send(channel, ReverseString(data))
         };
 
         Console.WriteLine($"whoami: {WardenImpersonator.Username}");
@@ -112,7 +112,7 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             WardenImpersonator.RunAsUser(() =>
             {
-                // Services that change impersonation should call RegDisablePredefinedCache 
+                // Services that change impersonation should call RegDisablePredefinedCache
                 // before using any of the predefined handles
                 // TODO: remove once Warden does this for the user in the next version
                 if (RegDisablePredefinedCacheEx() != 0)

@@ -14,14 +14,6 @@ if (cliArgs.Length != 2 || string.IsNullOrEmpty(cliArgs[1]))
 
 var apiKey = cliArgs[1];
 
-static string ReverseString(byte[] data)
-{
-    var str = Encoding.UTF8.GetString(data);
-    var charArray = str.ToCharArray();
-    Array.Reverse(charArray);
-    return new string(charArray);
-}
-
 // configure logging
 RainwayRuntime.SetLogLevel(RainwayLogLevel.Info, null);
 RainwayRuntime.SetLogSink((level, target, message) =>
@@ -38,20 +30,26 @@ var config = new RainwayConfig
     ExternalId = string.Empty,
     // audo accepts all connection request
     OnConnectionRequest = (request) => request.Accept(),
-    // auto accepts all stream request and gives full input privileges to the remote peer 
+    // auto accepts all stream request and gives full input privileges to the remote peer
     OnStreamRequest = (requests) => requests.Accept(new RainwayStreamConfig()
     {
         InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
         IsolateProcessIds = Array.Empty<uint>()
     }),
     // reverses the data sent by a peer over a channel and echos it back
-    OnPeerMessage = (peer, channel, data) => peer.Send(channel, ReverseString(data))
+    OnPeerMessage = (peer, channel, data) => {
+        var chars = Encoding.UTF8.GetString(data).ToCharArray();
+        Array.Reverse(chars);
+        peer.Send(channel, new string(chars));
+    },
 };
 
 // initalize the runtime
 using var runtime = await RainwayRuntime.Initialize(config);
 Console.WriteLine($"Rainway SDK Version: {runtime.Version}");
-Console.WriteLine($"Peer Id: {runtime.PeerId}");
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine($"Peer ID: {runtime.PeerId}");
+Console.ResetColor();
 Console.WriteLine("Press Ctrl+C To Terminate");
 
 var closeEvent = new AutoResetEvent(false);

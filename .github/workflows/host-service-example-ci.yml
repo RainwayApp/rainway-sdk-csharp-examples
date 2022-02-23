@@ -1,11 +1,11 @@
-name: Service Example CI
+name: Host Service Example CI
 
-on:  
+on:
   pull_request:
     branches: [ main ]
     paths:
-      - "service-example/**/*"
-      - ".github/workflows/service-example.ci.yml"
+      - "host-service-example/**/*"
+      - ".github/workflows/host-service-example.ci.yml"
 jobs:
   service_build:
 
@@ -19,10 +19,10 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: service-example
+      working-directory: host-service-example
     - name: Build
       run: dotnet build --no-restore
-      working-directory: service-example
+      working-directory: host-service-example
     - name: Test
       run: dotnet test --no-build --verbosity normal
-      working-directory: service-example
+      working-directory: host-service-example

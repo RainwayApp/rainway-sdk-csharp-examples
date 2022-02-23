@@ -8,74 +8,92 @@ using System.ServiceProcess;
 using System.Text;
 using Warden.Core;
 
-/// this example application demonstrates how to use the Rainway SDK in a C# console app that behaves as both a standard process and a service.
-/// the benefit of this design is that your application has a single primary executable. 
-/// it also allows your process to interact with parts of the desktop that are normally blocked, such as UAC prompts.
-/// a few notes:
-///   - we do not recommend running a GUI (WinForm, WPF, etc.) inside of this process. Basic elements such as the Windows file picker will be broken.
-///   - when running under SYSTEM certain calls (such as usage of the Registry class) need to be called with impersonation
-///   - there is a known issue where the peer ID does not persist between environments. this will be fixed in the next update of the SDK (and this line removed.)
+// This example application demonstrates how to use the Rainway SDK in a C#
+// console app that behaves as both a standard process and a service. The
+// benefit of this design is that your application has a single primary
+// executable. It also allows your process to interact with parts of the desktop
+// that are normally blocked, such as UAC prompts.
+//
+// A few notes:
+//
+// * We do not recommend running a GUI (WinForm, WPF, etc.) inside of this
+//   process. Basic elements such as the Windows file picker will be broken.
+// * When running under SYSTEM, certain calls (such as usage of the Registry
+//   class) need to be called with impersonation.
+
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
-    // first we check if the current process was launched by the service control manager (SCM)
+    // First we check if the current process was launched by the Service Control Manager (SCM).
     if (WardenProcess.GetCurrentProcess().IsWindowsService())
     {
-        // the 'BasicService' class handles the creation of an interactive process.
-        // please see the documentation inside the class for more information.
+        // The 'BasicService' class handles the creation of an interactive process.
+        // Please see the documentation inside the class for more information.
         ServiceBase.Run(new BasicService());
+        return;
     }
     else
     {
-        // this the primary entry point for the app and indicates an interactive context.
-        // there are two ways to get here:
-        //  1. 'service-example.exe' was run from commandline or was double-clicked.
-        //  2. the SCM launched 'service-example.exe' and then 'BasicService' recreated the process in the interactive terminal.
-        // in the case of '1', there is nothing special about the process. 
-        // in the case of '2', the process is on the interactive desktop, and has the environment and privileges of SYSTEM.
-        // when that is the case there are various properties about the current process and its environment we need
-        // to configure to ensure a stable runtime.
+        // This the primary entry point for the app and indicates an interactive
+        // context. There are two ways to get here:
+        //
+        //  1. 'service-example.exe' was run from the command line or was
+        //     double-clicked.
+        //  2. The SCM launched 'service-example.exe', and then 'BasicService'
+        //     recreated the process in the interactive terminal.
+        //
+        // In the first case, there is nothing special about the process. In the
+        // second case, the process is on the interactive desktop, and has the
+        // environment and privileges of SYSTEM. In this case there are various
+        // properties about the current process and its environment we need to
+        // configure to ensure a stable runtime.
 
-        // first: we disable native Windows error prompts.
-        // when we arrive here because of the SCM, before the process is forced into the interactive terminal
-        // these prompts will cause the program to hang forever as there is no way to interact with them
+        // First: we disable native Windows error prompts. When we arrive here
+        // because of the SCM, before the process is forced into the interactive
+        // terminal these prompts will cause the program to hang forever, as
+        // there is no way to interact with them.
         ErrorHandling.DisableErrorPrompts();
-        // second: we try to attach a console to the current process.
-        // if the process was launched normally, this will return false.
-        // when we arrive here because of the SCM, however, the process will not have any console.
+
+        // Second: we try to attach a console to the current process. If the
+        // process was launched normally, this will return false. When we arrive
+        // here because of the SCM, however, the process will not have any
+        // console.
         if (ApplicationConsole.TryAssociateConsole())
         {
             Console.WriteLine("Console associated with current process");
         }
-        // third: we disable Quick Edit mode.
-        // when this mode is enabled, selecting text in the console causes Windows to pause your applications execution.
+        // Third: we disable Quick Edit mode. When this mode is enabled,
+        // selecting text in the console causes Windows to pause your
+        // application's execution.
         if (ApplicationConsole.TryDisableQuickEdit())
         {
             Console.WriteLine("Quick edit mode disabled");
         }
-        // fourth: we forcefully disconnect any Remote Desktop sessions. this is critical.
-        // if RainwayRuntime.Initialize is called while an RDP session is active,
-        // it may not be able to locate discrete GPUs and properly initialize the environment for use.
-        // this call will end RDP sessions and reattach the interactive console.
-        // TODO: remove this line as it will be handled done by the runtime in the next release
+        // Fourth: we forcefully disconnect any Remote Desktop sessions. This is
+        // critical. If `RainwayRuntime.Initialize` is called while an RDP
+        // session is active, it may not be able to locate discrete GPUs and
+        // properly initialize the environment for use. This call will end RDP
+        // sessions and reattach the interactive console.
+        //
+        // TODO: remove this line as it will be handled done by the runtime in
+        // the next release.
         if (TerminalSession.TryDisconnectRDP())
         {
             Console.WriteLine("Forced Windows into the client terminal session.");
         }
-        // Prevents Windows from suspending the process or putting the display to sleep.
-        // TODO: remove this line as it will be handled done by the runtime in the next release
-        AwayMode.Enable();
-        // configure the Rainway logging
+
+        // Set up a callback for Rainway SDK logging.
         RainwayRuntime.SetLogLevel(RainwayLogLevel.Info, null);
         RainwayRuntime.SetLogSink((level, target, message) => Console.WriteLine($"{level} [{target}] {message}"));
 
-        // the runtime configuration
+        // Configure the Rainway runtime. Modify this to contain your API key,
+        // plus isolated process IDs, accept/reject logic, and so on.
         var config = new RainwayConfig
         {
             // your publishable API key should go here
             ApiKey = "YOUR_API_KEY",
             // any string identifying a user or entity within your app (optional)
-            ExternalId = string.Empty,
+            ExternalId = "Rainway SDK C# service-example",
             // audo accepts all connection request
             OnConnectionRequest = (request) => request.Accept(),
             // auto accepts all stream request and gives full input privileges to the remote peer 
@@ -84,8 +102,8 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
                 IsolateProcessIds = Array.Empty<uint>()
             }),
-            // reverses the data sent by a peer over a channel and echos it back
-            OnPeerMessage = (peer, channel, data) => peer.Send(channel, ReverseString(data))
+            // Example handler for messages from a remote peer: reverse UTF-8 data and echo it back.
+            OnPeerMessage = (peer, channel, data) => peer.Send(ReverseString(data))
         };
 
         Console.WriteLine($"whoami: {WardenImpersonator.Username}");
@@ -103,8 +121,9 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 }
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // if RegDisablePredefinedCacheEx is not called and the SCM launched this process,
-                    // then the below code will not work. `key` will be null.
+                    // If RegDisablePredefinedCacheEx is not called and the SCM
+                    // launched this process, then the below code will not work.
+                    // `key` will be null.
                     using var key = Registry.CurrentUser.OpenSubKey("Volatile Environment");
                     if (key is not null)
                     {
@@ -120,12 +139,13 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         }
 
 
-        // initalize the runtime
+        // Initalize the Rainway SDK runtime.
         using var runtime = await RainwayRuntime.Initialize(config);
         Console.WriteLine($"Rainway SDK Version: {runtime.Version}");
         Console.WriteLine($"Peer Id: {runtime.PeerId}");
         Console.WriteLine("Press Ctrl+C To Terminate");
-        // prevent the console app from closing right away
+
+        // Prevent the console app from closing right away.
         var closeEvent = new AutoResetEvent(false);
         Console.CancelKeyPress += (sender, eventArgs) =>
         {

@@ -37,11 +37,17 @@ var config = new RainwayConfig
         IsolateProcessIds = Array.Empty<uint>()
     }),
     // reverses the data sent by a peer over a channel and echos it back
-    OnPeerMessage = (peer, channel, data) => {
+    OnPeerMessage = (peer, channel, data) =>
+    {
         var chars = Encoding.UTF8.GetString(data).ToCharArray();
         Array.Reverse(chars);
         peer.Send(channel, new string(chars));
     },
+    // logs peer state changes, including connect and disconnect
+    OnPeerStateChange = (peer, state) =>
+    {
+        Console.WriteLine($"Peer {peer.PeerId} changed states to {state}");
+    }
 };
 
 // initalize the runtime

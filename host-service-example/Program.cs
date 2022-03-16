@@ -95,15 +95,15 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             // any string identifying a user or entity within your app (optional)
             ExternalId = "Rainway SDK C# service-example",
             // audo accepts all connection request
-            OnConnectionRequest = (request) => request.Accept(),
+            OnConnectionRequest = (runtime, request) => request.Accept(),
             // auto accepts all stream request and gives full input privileges to the remote peer
-            OnStreamRequest = (requests) => requests.Accept(new RainwayStreamConfig()
+            OnStreamRequest = (runtime, requests) => requests.Accept(new RainwayStreamConfig()
             {
                 InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
                 IsolateProcessIds = Array.Empty<uint>()
             }),
             // Example handler for messages from a remote peer: reverse UTF-8 data and echo it back.
-            OnPeerMessage = (peer, channel, data) => peer.Send(channel, ReverseString(data))
+            OnPeerMessage = (runtime, peer, channel, data) => peer.Send(channel, ReverseString(data))
         };
 
         Console.WriteLine($"whoami: {WardenImpersonator.Username}");

@@ -29,22 +29,22 @@ var config = new RainwayConfig
     // any string identifying a user or entity within your app (optional)
     ExternalId = string.Empty,
     // audo accepts all connection request
-    OnConnectionRequest = (request) => request.Accept(),
+    OnConnectionRequest = (runtime, request) => request.Accept(),
     // auto accepts all stream request and gives full input privileges to the remote peer
-    OnStreamRequest = (requests) => requests.Accept(new RainwayStreamConfig()
+    OnStreamRequest = (runtime, requests) => requests.Accept(new RainwayStreamConfig()
     {
         InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
         IsolateProcessIds = Array.Empty<uint>()
     }),
     // reverses the data sent by a peer over a channel and echos it back
-    OnPeerMessage = (peer, channel, data) =>
+    OnPeerMessage = (runtime, peer, channel, data) =>
     {
         var chars = Encoding.UTF8.GetString(data).ToCharArray();
         Array.Reverse(chars);
         peer.Send(channel, new string(chars));
     },
     // logs peer state changes, including connect and disconnect
-    OnPeerStateChange = (peer, state) =>
+    OnPeerStateChange = (runtime, peer, state) =>
     {
         Console.WriteLine($"Peer {peer.PeerId} changed states to {state}");
     }

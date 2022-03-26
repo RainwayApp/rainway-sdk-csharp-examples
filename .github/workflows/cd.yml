@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_and_release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
         run: ls -alR bin
 
       - name: Parse git commit
-        run: echo GH_REL_TAG=$(git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/v0-\1/") >> $GITHUB_ENV
+        run: $env:GITHUB_ENV = echo GH_REL_TAG=$(git rev-parse --short HEAD)
 
       # Locally we debug the tag parse
       - run: echo ${{ env.GH_REL_TAG }}
@@ -48,8 +48,8 @@ jobs:
       - name: Package bin
         run: |
           mkdir rel
-          zip rel/host-example-${{ env.GH_REL_TAG }}.zip -r bin/host-example &&
-          zip rel/host-service-example-${{ env.GH_REL_TAG }}.zip -r bin/host-service-example &&
+          Compress-Archive -DestinationPath rel/host-example-${{ env.GH_REL_TAG }}.zip -Path bin/host-example &&
+          Compress-Archive -DestinationPath rel/host-service-example-${{ env.GH_REL_TAG }}.zip -Path bin/host-service-example &&
           echo "Packaged."
 
       # Remotely we create the release from the tag

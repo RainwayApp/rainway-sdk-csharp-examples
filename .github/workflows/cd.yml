@@ -28,17 +28,10 @@ jobs:
         run: dotnet build -c release service-example.csproj && cp -R bin/ ../bin/host-service-example/
         working-directory: host-service-example
 
-      # Locally we debug the build output
-      - name: List bin (local only)
-        if: ${{ env.ACT }}
-        run: ls -alR bin
-
       - name: Parse git commit
         run: $env:GITHUB_ENV = echo GH_REL_TAG=$(git rev-parse --short HEAD)
 
-      # Locally we debug the tag parse
       - run: echo ${{ env.GH_REL_TAG }}
-        if: ${{ env.ACT }}
 
       # Remotely we create and push the tag
       - name: Create Release Tag

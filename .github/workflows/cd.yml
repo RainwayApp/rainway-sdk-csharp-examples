@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_and_release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -28,17 +28,10 @@ jobs:
         run: dotnet build -c release service-example.csproj && cp -R bin/ ../bin/host-service-example/
         working-directory: host-service-example
 
-      # Locally we debug the build output
-      - name: List bin (local only)
-        if: ${{ env.ACT }}
-        run: ls -alR bin
-
       - name: Parse git commit
-        run: echo GH_REL_TAG=$(git rev-parse --short HEAD 2> /dev/null | sed "s/\(.*\)/v0-\1/") >> $GITHUB_ENV
+        run: echo GH_REL_TAG=v0-$(git rev-parse --short HEAD) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      # Locally we debug the tag parse
       - run: echo ${{ env.GH_REL_TAG }}
-        if: ${{ env.ACT }}
 
       # Remotely we create and push the tag
       - name: Create Release Tag
@@ -48,8 +41,8 @@ jobs:
       - name: Package bin
         run: |
           mkdir rel
-          zip rel/host-example-${{ env.GH_REL_TAG }}.zip -r bin/host-example &&
-          zip rel/host-service-example-${{ env.GH_REL_TAG }}.zip -r bin/host-service-example &&
+          Compress-Archive -DestinationPath rel/host-example-${{ env.GH_REL_TAG }}.zip -Path bin/host-example &&
+          Compress-Archive -DestinationPath rel/host-service-example-${{ env.GH_REL_TAG }}.zip -Path bin/host-service-example &&
           echo "Packaged."
 
       # Remotely we create the release from the tag

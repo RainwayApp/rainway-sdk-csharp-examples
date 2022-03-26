@@ -29,7 +29,7 @@ jobs:
         working-directory: host-service-example
 
       - name: Parse git commit
-        run: echo GH_REL_TAG=$(git rev-parse --short HEAD) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        run: echo GH_REL_TAG=v0-$(git rev-parse --short HEAD) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - run: echo ${{ env.GH_REL_TAG }}
 

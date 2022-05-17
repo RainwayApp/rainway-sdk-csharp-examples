@@ -41,8 +41,8 @@ jobs:
       - name: Package bin
         run: |
           mkdir rel
-          Compress-Archive -DestinationPath rel/host-example-${{ env.GH_REL_TAG }}.zip -Path bin/host-example &&
-          Compress-Archive -DestinationPath rel/host-service-example-${{ env.GH_REL_TAG }}.zip -Path bin/host-service-example &&
+          Compress-Archive -DestinationPath rel/host-example.zip -Path bin/host-example &&
+          Compress-Archive -DestinationPath rel/host-service-example.zip -Path bin/host-service-example &&
           echo "Packaged."
 
       # Remotely we create the release from the tag

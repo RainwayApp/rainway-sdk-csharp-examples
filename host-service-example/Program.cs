@@ -99,6 +99,7 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             // auto accepts all stream request and gives full input privileges to the remote peer
             OnStreamRequest = (runtime, requests) => requests.Accept(new RainwayStreamConfig()
             {
+                StreamType = RainwayStreamType.FullDesktop,
                 InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
                 IsolateProcessIds = Array.Empty<uint>()
             }),

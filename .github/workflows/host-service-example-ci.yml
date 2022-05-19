@@ -2,7 +2,7 @@ name: Host Service Example CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, beta ]
     paths:
       - "host-service-example/**/*"
       - ".github/workflows/host-service-example.ci.yml"

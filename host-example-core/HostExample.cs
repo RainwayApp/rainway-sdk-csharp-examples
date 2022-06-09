@@ -26,14 +26,18 @@ namespace Rainway.HostExample
                 // your publishable API key read from command line arguments above
                 ApiKey = rainwayApiKey,
                 // any string identifying a user or entity within your app (optional)
-                ExternalId = string.Empty,
-                // audo accepts all connection request
-                OnConnectionRequest = (runtime, request) => request.Accept(),
+                ExternalId = "Rainway C# Host Example",
+                OnConnectionRequest = (runtime, request) => {
+                    if (AcceptIncoming)
+                        request.Accept();
+                    else
+                        request.Reject("accept setting is off");
+                },
                 // auto accepts all stream request and gives full input privileges to the remote peer
                 OnStreamRequest = (runtime, requests) => requests.Accept(new RainwayStreamConfig()
                 {
                     StreamType = RainwayStreamType.FullDesktop,
-                    InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
+                    InputLevel = inputLevel,
                     IsolateProcessIds = Array.Empty<uint>()
                 }),
                 // reverses the data sent by a peer over a channel and echos it back
@@ -50,6 +54,9 @@ namespace Rainway.HostExample
         public RainwayPeerId? PeerId => runtime?.PeerId;
         public Version? Version => runtime?.Version;
 
+        public bool AcceptIncoming { get; set; } = true;
+        public bool Connected => runtime != null;
+
         public void Stop()
         {
             runtime?.Dispose();
@@ -61,6 +68,23 @@ namespace Rainway.HostExample
             var chars = Encoding.UTF8.GetString(data).ToCharArray();
             Array.Reverse(chars);
             peer.Send(channel, new string(chars));
+        }
+
+        private RainwayInputLevel inputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll;
+
+        public void SetInputLevel(bool mouse, bool keyboard, bool gamepad)
+        {
+            inputLevel = (mouse ? RainwayInputLevel.Mouse : 0)
+                | (keyboard ? RainwayInputLevel.Keyboard : 0)
+                | (gamepad ? RainwayInputLevel.GamepadPortAll : 0);
+            if (runtime == null) return;
+            foreach (var peer in runtime.Peers.Values)
+            {
+                foreach (var stream in peer.Streams)
+                {
+                    stream.Permissions = inputLevel;
+                }
+            }
         }
     }
 }

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "host-example", "host-exampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "host-example-core", "..\host-example-core\host-example-core.csproj", "{E7A35113-43DE-4C6B-A4E8-0762B2E1C45F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "host-example-gui", "..\host-example-gui\host-example-gui.csproj", "{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,14 @@ Global
 		{E7A35113-43DE-4C6B-A4E8-0762B2E1C45F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E7A35113-43DE-4C6B-A4E8-0762B2E1C45F}.Release|x64.ActiveCfg = Release|Any CPU
 		{E7A35113-43DE-4C6B-A4E8-0762B2E1C45F}.Release|x64.Build.0 = Release|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Debug|x64.Build.0 = Debug|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Release|x64.ActiveCfg = Release|Any CPU
+		{4F9822B9-611D-4899-ABB1-FEFBA1C70D70}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,7 +24,7 @@ namespace host_example_gui
         private void RecomputeHint()
         {
             if (core.Connected) {
-                linkLabelWebDemo.Text = "You're connected! Now try connecting to this peer in the Web Demo from another device.";
+                linkLabelWebDemo.Text = "Connected! Enter the above Peer ID in the Web Demo to connect here.";
                 linkLabelWebDemo.LinkArea = new LinkArea(linkLabelWebDemo.Text.IndexOf("Web Demo"), "Web Demo".Length);
             } else {
                 linkLabelWebDemo.Text = "Enter your Rainway API key and click \"Connect\" to start.";
@@ -79,14 +79,14 @@ namespace host_example_gui
             RecomputeInputLevel();
         }
 
-        private void RecomputeInputLevel()
-        {
-            core.SetInputLevel(checkBoxMouse.Checked, checkBoxKeyboard.Checked, true);
-        }
-
         private void checkBoxKeyboard_CheckedChanged(object sender, EventArgs e)
         {
             RecomputeInputLevel();
+        }
+
+        private void RecomputeInputLevel()
+        {
+            core.SetInputLevel(checkBoxMouse.Checked, checkBoxKeyboard.Checked, true);
         }
 
         private void checkBoxAcceptIncoming_CheckedChanged(object sender, EventArgs e)

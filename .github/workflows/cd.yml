@@ -24,6 +24,10 @@ jobs:
         run: dotnet build -c release host-example.csproj && cp -R bin/ ../bin/host-example/
         working-directory: host-example
 
+      - name: Build host-example-gui
+        run: dotnet build -c release host-example-gui.csproj && cp -R bin/ ../bin/host-example-gui/
+        working-directory: host-example-gui
+
       - name: Build host-service-example
         run: dotnet build -c release service-example.csproj && cp -R bin/ ../bin/host-service-example/
         working-directory: host-service-example
@@ -42,6 +46,7 @@ jobs:
         run: |
           mkdir rel
           Compress-Archive -DestinationPath rel/host-example.zip -Path bin/host-example &&
+          Compress-Archive -DestinationPath rel/host-example-gui.zip -Path bin/host-example-gui &&
           Compress-Archive -DestinationPath rel/host-service-example.zip -Path bin/host-service-example &&
           echo "Packaged."
 

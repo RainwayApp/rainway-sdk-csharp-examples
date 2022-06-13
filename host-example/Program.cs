@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
-using Rainway.SDK;
 
 // retrieve the cli arguments
 var cliArgs = Environment.GetCommandLineArgs();
@@ -13,49 +12,13 @@ if (cliArgs.Length != 2 || string.IsNullOrEmpty(cliArgs[1]))
 }
 
 var apiKey = cliArgs[1];
-
-// configure logging
-RainwayRuntime.SetLogLevel(RainwayLogLevel.Info, null);
-RainwayRuntime.SetLogSink((level, target, message) =>
-{
-    Console.WriteLine($"{level} [{target}] {message}");
-});
-
-// the runtime configuration
-var config = new RainwayConfig
-{
-    // your publishable API key read from command line arguments above
-    ApiKey = apiKey,
-    // any string identifying a user or entity within your app (optional)
-    ExternalId = string.Empty,
-    // audo accepts all connection request
-    OnConnectionRequest = (runtime, request) => request.Accept(),
-    // auto accepts all stream request and gives full input privileges to the remote peer
-    OnStreamRequest = (runtime, requests) => requests.Accept(new RainwayStreamConfig()
-    {
-        StreamType = RainwayStreamType.FullDesktop,
-        InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
-        IsolateProcessIds = Array.Empty<uint>()
-    }),
-    // reverses the data sent by a peer over a channel and echos it back
-    OnPeerMessage = (runtime, peer, channel, data) =>
-    {
-        var chars = Encoding.UTF8.GetString(data).ToCharArray();
-        Array.Reverse(chars);
-        peer.Send(channel, new string(chars));
-    },
-    // logs peer state changes, including connect and disconnect
-    OnPeerStateChange = (runtime, peer, state) =>
-    {
-        Console.WriteLine($"Peer {peer.PeerId} changed states to {state}");
-    }
-};
+var core = new Rainway.HostExample.Core(Console.WriteLine);
 
 // initalize the runtime
-using var runtime = await RainwayRuntime.Initialize(config);
-Console.WriteLine($"Rainway SDK Version: {runtime.Version}");
+await core.Start(apiKey);
+Console.WriteLine($"Rainway SDK Version: {core.Version}");
 Console.ForegroundColor = ConsoleColor.Green;
-Console.WriteLine($"Peer ID: {runtime.PeerId}");
+Console.WriteLine($"Peer ID: {core.PeerId}");
 Console.ResetColor();
 Console.WriteLine("Press Ctrl+C To Terminate");
 

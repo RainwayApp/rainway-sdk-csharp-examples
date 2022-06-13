@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace host_example_gui
 {
-    public partial class Form1 : Form
+    public partial class HostExampleForm : Form
     {
         private readonly Rainway.HostExample.Core core;
 
@@ -14,7 +14,7 @@ namespace host_example_gui
             });
         }
 
-        public Form1()
+        public HostExampleForm()
         {
             InitializeComponent();
             core = new Rainway.HostExample.Core((line) => AddLogLine(line));
@@ -24,7 +24,7 @@ namespace host_example_gui
         private void RecomputeHint()
         {
             if (core.Connected) {
-                linkLabelWebDemo.Text = "Connected! Enter the above Peer ID in the Web Demo to connect here.";
+                linkLabelWebDemo.Text = "Connected! Enter the above Peer ID in the Web Demo on another device to connect here.";
                 linkLabelWebDemo.LinkArea = new LinkArea(linkLabelWebDemo.Text.IndexOf("Web Demo"), "Web Demo".Length);
             } else {
                 linkLabelWebDemo.Text = "Enter your Rainway API key and click \"Connect\" to start.";

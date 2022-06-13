@@ -89,6 +89,9 @@ namespace Rainway.HostExample
         /// </summary>
         public bool Connected => runtime != null;
 
+        /// <summary>
+        /// Disconnect from all peers and from the Rainway Network.
+        /// </summary>
         public void Stop()
         {
             runtime?.Dispose();

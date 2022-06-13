@@ -1,6 +1,6 @@
 ﻿namespace host_example_gui
 {
-    partial class Form1
+    partial class HostExampleForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HostExampleForm));
             this.linkLabelManageApiKeys = new System.Windows.Forms.LinkLabel();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxApiKey = new System.Windows.Forms.TextBox();

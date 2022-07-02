@@ -58,7 +58,7 @@ namespace host_example_gui
             buttonConnect.Enabled = false;
             linkLabelWebDemo.Text = "Connecting...";
             await core.Start(apiKey);
-            textBoxPeerId.Text = core.PeerId?.ToString() ?? "(failed to get Peer ID)";
+            textBoxPeerId.Text = core.Id?.ToString() ?? "(failed to get Peer ID)";
             groupBoxSettings.Enabled = true;
             buttonDisconnect.Enabled = true;
             RecomputeHint();

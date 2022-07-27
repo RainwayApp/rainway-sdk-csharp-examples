@@ -1,4 +1,5 @@
 ﻿using Rainway.SDK;
+using Rainway.SDK.Identifiers;
 using System.Text;
 
 namespace Rainway.HostExample
@@ -10,7 +11,7 @@ namespace Rainway.HostExample
     public class Core
     {
         private readonly Action<string> logCallback;
-        private RainwayRuntime? runtime;
+        private RainwayConnection? conn;
 
         /// <summary>
         /// Instantiate the application using the given callback for logging.
@@ -31,52 +32,54 @@ namespace Rainway.HostExample
         {
             // First, set up logging so that we'll get descriptive log events if
             // initialization fails.
-            RainwayRuntime.SetLogLevel(RainwayLogLevel.Info, null);
-            RainwayRuntime.SetLogSink((level, target, message) =>
+            RainwaySDK.LogLevel = LogLevel.Info;
+            RainwaySDK.LogHandler = (ev) =>
             {
-                logCallback($"{level} [{target}] {message}");
-            });
-
-            // Define callbacks for Rainway events:
-            var config = new RainwayConfig
-            {
-                ApiKey = rainwayApiKey,
-                ExternalId = "Rainway C# Host Example",
-                OnConnectionRequest = (runtime, request) =>
-                {
-                    if (AcceptIncoming) request.Accept();
-                    else request.Reject("accept setting is off");
-                },
-                OnStreamRequest = (runtime, request) =>
-                {
-                    request.Accept(new RainwayStreamConfig()
-                    {
-                        StreamType = RainwayStreamType.FullDesktop,
-                        InputLevel = inputLevel,
-                        IsolateProcessIds = Array.Empty<uint>()
-                    });
-                },
-                OnPeerMessage = (runtime, peer, channel, data) => HandlePeerMessage(peer, channel, data),
-                OnPeerStateChange = (runtime, peer, state) =>
-                {
-                    logCallback($"Peer {peer.PeerId} changed states to {state}");
-                }
+                logCallback($"{ev.Data.Level} [{ev.Data.Target}] {ev.Data.Message}");
             };
 
             // Initialize Rainway with the config. This task completes when
             // we're successfully connected to the Rainway Network.
-            runtime = await RainwayRuntime.Initialize(config);
+            conn = await RainwaySDK.ConnectAsync(new SDK.Options.ConnectOptions() { ApiKey = rainwayApiKey, ExternalId = "Rainway C# Host Example" });
+
+            conn.PeerRequest += async (_, req) =>
+            {
+                if (AcceptIncoming)
+                {
+                    var peer = await req.AcceptAsync();
+                    peer.StateChange += (_, ev) =>
+                    {
+                        logCallback($"Peer {peer.Id} changed states to {ev.Data}");
+                    };
+                    peer.StreamRequest += async (_, req) =>
+                    {
+                        var stream = await req.AcceptAsync(new SDK.Options.OutboundStreamOptions() { Type = StreamType.FullDesktop, Permissions = inputLevel });
+                    };
+                    peer.DataChannel += (_, ev) =>
+                    {
+                        var dc = ev.Data;
+                        dc.Message += (_, ev) =>
+                        {
+                            HandleMessage(dc, ev.Data);
+                        };
+                    };
+                }
+                else
+                {
+                    await req.RejectAsync("accept setting is off");
+                }
+            };
         }
 
         /// <summary>
         /// If connected: get our own Peer ID.
         /// </summary>
-        public RainwayPeerId? PeerId => runtime?.PeerId;
+        public PeerId? Id => conn?.Id;
 
         /// <summary>
         /// If connected: get the Rainway SDK version.
         /// </summary>
-        public Version? Version => runtime?.Version;
+        public Version? Version => new Version(RainwaySDK.Version);
 
         /// <summary>
         /// A publicly settable property that determines whether to accept
@@ -87,40 +90,40 @@ namespace Rainway.HostExample
         /// <summary>
         /// Are we currently connected?
         /// </summary>
-        public bool Connected => runtime != null;
+        public bool Connected => conn != null;
 
         /// <summary>
         /// Disconnect from all peers and from the Rainway Network.
         /// </summary>
         public void Stop()
         {
-            runtime?.Dispose();
-            runtime = null;
+            conn?.Dispose();
+            conn = null;
         }
 
-        private void HandlePeerMessage(RainwayPeer peer, string channel, byte[] data)
+        private void HandleMessage(DataChannel ch, byte[] data)
         {
             var chars = Encoding.UTF8.GetString(data).ToCharArray();
             Array.Reverse(chars);
-            peer.Send(channel, new string(chars));
+            ch.Send(new string(chars));
         }
 
-        private RainwayInputLevel inputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll;
+        private InputLevel inputLevel = InputLevel.Mouse | InputLevel.Keyboard | InputLevel.GamepadPortAll;
 
         public void SetInputLevel(bool mouse, bool keyboard, bool gamepad)
         {
             // Set it for future connections...
-            inputLevel = (mouse ? RainwayInputLevel.Mouse : 0)
-                | (keyboard ? RainwayInputLevel.Keyboard : 0)
-                | (gamepad ? RainwayInputLevel.GamepadPortAll : 0);
+            inputLevel = (mouse ? InputLevel.Mouse : 0)
+                | (keyboard ? InputLevel.Keyboard : 0)
+                | (gamepad ? InputLevel.GamepadPortAll : 0);
 
             // And if connected, update it in active streams:
-            if (runtime == null) return;
-            foreach (var peer in runtime.Peers.Values)
+            if (conn == null) return;
+            foreach (var peer in conn.Peers)
             {
-                foreach (var stream in peer.Streams)
+                foreach (var stream in peer.OutboundStreams)
                 {
-                    stream.Permissions = inputLevel;
+                    stream.Value.Permissions = inputLevel;
                 }
             }
         }

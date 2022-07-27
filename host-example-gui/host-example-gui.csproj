@@ -8,6 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>rainway_main_256x_0Zg_icon.ico</ApplicationIcon>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

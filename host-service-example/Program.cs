@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using Rainway.SDK;
+using Rainway.SDK.Options;
 using ServiceExample;
 using ServiceExample.Windows;
 using System.Runtime.InteropServices;
@@ -82,29 +83,46 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             Console.WriteLine("Forced Windows into the client terminal session.");
         }
 
-        // Set up a callback for Rainway SDK logging.
-        RainwayRuntime.SetLogLevel(RainwayLogLevel.Info, null);
-        RainwayRuntime.SetLogSink((level, target, message) => Console.WriteLine($"{level} [{target}] {message}"));
+        // Set up a callback for Rainway SDK logging
+        RainwaySDK.LogLevel = LogLevel.Info;
+        RainwaySDK.LogHandler += (ev) => Console.WriteLine($"{ev.Data.Level} [{ev.Data.Target}] {ev.Data.Message}");
 
-        // Configure the Rainway runtime. Modify this to contain your API key,
-        // plus isolated process IDs, accept/reject logic, and so on.
-        var config = new RainwayConfig
-        {
+        // Connect to Rainway services. Modify this to contain your API key
+        var connection = await RainwaySDK.ConnectAsync(new ConnectOptions() {
             // your publishable API key should go here
             ApiKey = "YOUR_API_KEY",
             // any string identifying a user or entity within your app (optional)
             ExternalId = "Rainway SDK C# service-example",
-            // audo accepts all connection request
-            OnConnectionRequest = (runtime, request) => request.Accept(),
-            // auto accepts all stream request and gives full input privileges to the remote peer
-            OnStreamRequest = (runtime, requests) => requests.Accept(new RainwayStreamConfig()
+        });
+
+        // auto accepts all connection requests
+        connection.PeerRequest += async (_, request) =>
+        {
+            var peer = await request.AcceptAsync();
+
+            peer.StreamRequest += async (_, request) =>
             {
-                StreamType = RainwayStreamType.FullDesktop,
-                InputLevel = RainwayInputLevel.Mouse | RainwayInputLevel.Keyboard | RainwayInputLevel.GamepadPortAll,
-                IsolateProcessIds = Array.Empty<uint>()
-            }),
-            // Example handler for messages from a remote peer: reverse UTF-8 data and echo it back.
-            OnPeerMessage = (runtime, peer, channel, data) => peer.Send(channel, ReverseString(data))
+                // auto accepts all stream request and gives full input permissions to the remote peer
+                var stream = await request.AcceptAsync(new OutboundStreamOptions()
+                {
+                    Type = StreamType.FullDesktop,
+                    Permissions = InputLevel.All,
+                });
+
+                // attach an event listener for when data channels are created
+                // this lets us interact with the data channel (and it's messages)
+                peer.DataChannel += (_, ev) =>
+                {
+                    // obtain the created data channel
+                    var channel = ev.Data;
+
+                    // Example handler for messages from a remote peer: reverse UTF-8 data and echo it back
+                    channel.Message += (_, ev) =>
+                    {
+                        channel.Send(ReverseString(ev.Data));
+                    };
+                };
+            };
         };
 
         Console.WriteLine($"whoami: {WardenImpersonator.Username}");
@@ -140,10 +158,9 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         }
 
 
-        // Initalize the Rainway SDK runtime.
-        using var runtime = await RainwayRuntime.Initialize(config);
-        Console.WriteLine($"Rainway SDK Version: {runtime.Version}");
-        Console.WriteLine($"Peer Id: {runtime.PeerId}");
+        // Inform the user about some Rainway state
+        Console.WriteLine($"Rainway SDK Version: {RainwaySDK.Version}");
+        Console.WriteLine($"Peer Id: {connection.Id}");
         Console.WriteLine("Press Ctrl+C To Terminate");
 
         // Prevent the console app from closing right away.

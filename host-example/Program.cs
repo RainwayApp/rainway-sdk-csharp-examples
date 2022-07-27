@@ -18,7 +18,7 @@ var core = new Rainway.HostExample.Core(Console.WriteLine);
 await core.Start(apiKey);
 Console.WriteLine($"Rainway SDK Version: {core.Version}");
 Console.ForegroundColor = ConsoleColor.Green;
-Console.WriteLine($"Peer ID: {core.PeerId}");
+Console.WriteLine($"Peer ID: {core.Id}");
 Console.ResetColor();
 Console.WriteLine("Press Ctrl+C To Terminate");
 

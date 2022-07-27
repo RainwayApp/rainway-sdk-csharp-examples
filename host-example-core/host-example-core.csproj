@@ -5,10 +5,11 @@
     <RootNamespace>host_example_core</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="rainway-sdk" Version="0.3.0" />
+    <PackageReference Include="rainway-sdk" Version="0.4.0" />
   </ItemGroup>
 
 </Project>

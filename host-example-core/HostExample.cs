@@ -79,7 +79,7 @@ namespace Rainway.HostExample
         /// <summary>
         /// If connected: get the Rainway SDK version.
         /// </summary>
-        public Version? Version => new Version(RainwaySDK.Version);
+        public string Version => RainwaySDK.Version;
 
         /// <summary>
         /// A publicly settable property that determines whether to accept

@@ -23,6 +23,7 @@ namespace host_example_gui
 
         private void RecomputeHint()
         {
+            this.Text = "Rainway C# Host Example (" + core.Version + ")";
             if (core.Connected) {
                 linkLabelWebDemo.Text = "Connected! Enter the above Peer ID in the Web Demo on another device to connect here.";
                 linkLabelWebDemo.LinkArea = new LinkArea(linkLabelWebDemo.Text.IndexOf("Web Demo"), "Web Demo".Length);
